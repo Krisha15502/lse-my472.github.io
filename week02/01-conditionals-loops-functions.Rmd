@@ -4,7 +4,9 @@ author: "Ryan Hübert (AT 2024)"
 date: "October 2024"
 output: html_document
 ---
-
+```{r}
+install.packages("tidyverse")
+```
 In this file, we will continue to review a few key concepts which you have seen 
 in the preparatory course.
 
