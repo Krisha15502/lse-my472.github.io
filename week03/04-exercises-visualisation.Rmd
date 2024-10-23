@@ -4,7 +4,9 @@ author: "Pablo Barberá, Friedrich Geiecke"
 date: "AT 2024"
 output: html_document
 ---
-
+```{r}
+install.packages("plotly")
+```
 
 ```{r}
 # install.packages("plotly") ## IF NOT ALREADY INSTALLED
@@ -38,17 +40,22 @@ pres <- data.frame(name, start, end, party, stringsAsFactors=F)
 
 ```{r}
 # Define range of unemployment and date variables
-
-
+date_range <- range(unemp$date, na.rm = TRUE)
+unemp_range <- range(unemp$unemp, na.rm = TRUE)
 
 # Creating a line-plot with unemployment and date
-
-
+plot = (
+  ggplot() + geom_line(data = unemp, mapping = aes(x= date, y = unemp))
+  + scale_x_date(limits = date_range, date_labels = "%Y", breaks = seq(as.Date("1960-01-01"), as.Date("2000-01-01"), by = "20 years"))
+  + scale_y_continuous(limits = c(0.02, 0.12), breaks = seq(0.00, 0.14, by = 0.02), labels = scales::percent_format(accuracy = 1)) + labs(x = "Party of President", y = "Unemployment Rate")
+)
+plot
 
 # Adding the rectangle geometry (set axes limits so that background covers entire plot)
-
-
-
+plot = (plot + 
+  geom_rect(data = pres, aes(xmin = date_range[1], xmax = as.Date("2000-01-01"), ymin = 0.00, ymax = 0.14, fill = party), alpha = 0.2))
+plot
+date_range
 # Adding president names
 
 
