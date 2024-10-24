@@ -20,7 +20,7 @@ library(tidyverse)
 First, let's examine how special characters can affect file size. Since `readr` encodes all text files with UTF-8, the accents will require more bytes
 
 ```{r}
-ddir <- "" # insert file path to the directory with the data
+ddir <- "/Users/krishachandnani/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week04/data/" # insert file path to the directory with the data
 
 # Write a plain text file with my last name
 raw <- "Hübert" # how many bytes should you expect?
