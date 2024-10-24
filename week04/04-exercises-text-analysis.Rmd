@@ -14,13 +14,15 @@ Suppose that you are doing a project analysing news articles from around the wor
 ```{r}
 library(tidyverse)
 my.file <- "data/news-article-1.txt"
-raw <- read_file(my.file, locale = locale(encoding="___________"))
-print(raw) # this is __________ [language]
-my.utf.file <- "___________"
-write_file(___________, ___________)
+raw <- read_file(my.file, locale = locale(encoding="Shift_JIS"))
+print(raw) # this is Japanese [language]
+my.utf.file <- read_file(my.file, locale = locale(encoding="Shift_JIS"))
+write_file(my.utf.file, paste0(ddir, "news-article-1-UTF-8.txt"))
 ```
 
-
+```{r}
+read_file(paste0(ddir, "news-article-1-UTF-8.txt"))
+```
 ## Exercise 2: regex in R
 
 Useful reference for string functions in R: <https://stringr.tidyverse.org/articles/stringr.html>
@@ -32,8 +34,8 @@ The file `uol.txt` in the course repo for this week (in the `data` folder) conta
 
 ```{r}
 # library(tidyverse) # only load if you haven't already
-text <- ________("data/uol.txt")
-________(text, "________") 
+text <- read_file("data/uol.txt")
+str_view(text, "[A-Z]+[0-9]+[A-Z]? *[0-9]?[A-Z]+") 
 ```
 
 Next, try to mute/delete the second part of each postcode. Add a capturing group to your regular expression with which you can select only the first part, i.e. the first 2-4 characters of the postcodes. Then use find & replace in your text editor or `str_replace_all()` in R, and replace all postcodes with only the information stored in capturing group 1. This deletes the second part of each postcode.
