@@ -38,7 +38,7 @@ rD <- rsDriver(browser=c("firefox"), verbose = F, port = netstat::free_port(rand
 driver <- rD$client # note this alternative but equivalent call for setting the driver client
 
 # Navigate to the selected URL address
-driver$________(url)
+driver$navigate(url)
 Sys.sleep(0.5)
 ```
 
@@ -48,7 +48,7 @@ Here's how we would check that it worked:
 
 ```{r}
 # Get the page source code of the current page
-src <- driver$________() # Hint: look up how to get the page source in the help documents for RSelenium: https://cran.r-project.org/web/packages/RSelenium/index.html
+src <- driver$getPageSource() # Hint: look up how to get the page source in the help documents for RSelenium: https://cran.r-project.org/web/packages/RSelenium/index.html
 
 # and see its first 1000 characters
 substr(src, 1, 1000) # This is a really nice function to have to look at portions of a string
@@ -61,20 +61,20 @@ First things first: the following code will remove the cookie banner at the bott
 
 # If you get an error saying "NoSuchElement" below, then you might not be on the correct frame.
 # The cookie pop-up window is on frame 1
-# driver$switchToFrame(1)
+driver$switchToFrame(1)
 # Note: when I (Ryan) run this, I have to switch frames; you probably will to
 
 # 1. Use a command to locate the button on the page
-accept_button <- driver$findElement(using = "xpath", value = ________)
+accept_button <- driver$findElement(using = "xpath", value = "/html/body/div/div[2]/div[3]/div/div/button[1]")
 
 # 2. Click on the button:
-accept_button$________()
+accept_button$clickElement()
 Sys.sleep(0.5)
 
 # Exercise: If you did *not* want to accept, then what would be the xpath you would use instead?
 
 # Switch back to default frame -- if this does not work try driver$switchToFrame(NULL)
-# driver$switchToFrame(NA) 
+driver$switchToFrame(NA) 
 ```
 
 There is a search bar that allows you to find each MP constituency's results using either post codes or constituency names. Let's find the results from the constituency around LSE, using postcode "WC2A2AE". First, find the search bar using the inspect elements tool, and then enter "WC2A2AE" into the search bar.
@@ -83,13 +83,13 @@ Note the way we are doing this: first we create an object that has the XPath we 
 
 ```{r}
 # 1. First, construct an XPath finding the search bar on the page
-search_field_xpath <- ________ 
+search_field_xpath <- "/html/body/main/article/div/div/div/article/div/div/div/figure/figure/div/div/section[3]/div[2]/div/div/div/input" 
 
 # 2. Using this XPath, find the node on the page
-search_field <- driver$________(using = 'xpath', value = search_field_xpath)
+search_field <- driver$findElement(using = 'xpath', value = search_field_xpath)
 
 # 3. send a post code to the search field
-search_field$________(list("WC2A2AE"))
+search_field$sendKeysToElement(list("WC2A2AE"))
 
 Sys.sleep(0.5)
 ```
@@ -98,13 +98,13 @@ Notice that when you put text into the search bar, a dynamic list appears of all
 
 ```{r}
 read_html(driver$getPageSource()[[1]]) |> 
-  html_elements(xpath="________")
+html_elements(xpath="//*[text() = 'Cities of London and Westminster']")
 ```
 
 We can see that the list of suggestions pops up as a list (`ul` and `li` html tags---review these if you do not recall). Now, extract out all the constituency names. In this case, there is only one, but there may be situations where there are multiple options.
 
 ```{r}
-sugg_list_xpath <- ________
+sugg_list_xpath <- 
 sugg_list <- driver$findElements(using="xpath", value=sugg_list_xpath)
 sugg_list <- unlist(lapply(sugg_list, function(x) x$getElementText()[[1]]))
 ```
