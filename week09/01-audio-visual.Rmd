@@ -11,8 +11,8 @@ In this document, you will explore how to ingest audio and image data into R, ho
 We begin with audio data, where we will use the `tuneR` and `seewave` packages. Note: you may need to install these packages before you can run this code.
 
 ```{r, eval=FALSE}
-# install.packages("tuneR")
-# install.packages("seewave")
+install.packages("tuneR")
+install.packages("seewave")
 library("tuneR")
 library("seewave")
 library("tidyverse")
@@ -39,7 +39,7 @@ Here are a few recordings that you can download and work with on your own time:
 Let's look at Martin Luther King's "I have a dream" speech and do some analysis. First we need to get the file. We will do this by (1) setting a working directory and then (2) downloading the `.mp3` file into this directory.
 
 ```{r, eval=FALSE}
-odir <- "tba" # Change this to a location on your computer
+odir <- "/Users/krishachandnani/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week09" # Change this to a location on your computer
 
 # Check if the directory exists, and if not, create it
 if(dir.exists(odir)){ } else { dir.create(odir) }
@@ -154,7 +154,7 @@ library("tidyverse")
 library("rvest")
 
 # Create folder for the files we are downloading
-odir <- "tba" # Change this to a location on your computer
+odir <- "/Users/krishachandnani/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week09" # Change this to a location on your computer
 
 # Check if the directory exists, and if not, create it
 if(dir.exists(odir)){ } else { dir.create(odir) }
@@ -212,7 +212,7 @@ for(p in 1:nrow(df)){
 Now, let's look at one of these photos. First, let's examine the metadata using the `exifr` package.
 
 ```{r, eval=FALSE}
-# install.packages("exifr")
+install.packages("exifr")
 library("exifr")
 
 # Select Ryan!
@@ -227,7 +227,7 @@ print(metadata)
 Now let's actually import the image data.
 
 ```{r, eval=FALSE}
-# install.packages("jpeg")
+install.packages("jpeg")
 library("jpeg")
 
 ## Read in an image

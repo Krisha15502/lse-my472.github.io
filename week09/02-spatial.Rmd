@@ -10,7 +10,9 @@ First, let's load packages.
 
 ```{r, eval=FALSE}
 library(tidyverse)
+install.packages("sf")
 library(sf)
+install.packages("terra")
 library(terra)
 library(rvest)
 library(xml2)
@@ -21,7 +23,7 @@ We will explore patterns in the data for live births in London. The data is main
 First, let's create a directory to store the data we'll use.
 
 ```{r, eval=FALSE}
-odir <- "tba" # Change this to a location on your computer
+odir <- "/Users/krishachandnani/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week09/spatial" # Change this to a location on your computer
 
 # Check if the directory exists, and if not, create it
 if(dir.exists(odir)){ } else { dir.create(odir) }
