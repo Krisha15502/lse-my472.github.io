@@ -17,13 +17,13 @@ Before we proceed, let's do some "directory management" and load the relevant pa
 ```{r}
 ## NOTE: PLEASE REPLACE "YOUR_PATH" WITH THE PATH TO THE LOCATION ON YOUR COMPUTER 
 ##       WHERE YOU WOULD LIKE TO STORE ALL YOUR WORK FOR THESE EXERCISES!
-root <- "YOUR_PATH/seminar9" 
-ddir <- "YOUR_PATH/seminar9/data"
-odir <- "YOUR_PATH/seminar9/outputs"
+root <- "~/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week09/seminar9" 
+ddir <- "~/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week09/seminar9/data"
+odir <- "~/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week09/seminar9/outputs"
 
-if(!dir.exists(root)) { dir.________(root) }
-if(!dir.exists(ddir)) { dir.________(ddir) }
-if(!dir.exists(odir)) { dir.________(odir) }
+if(!dir.exists(root)) { dir.create(root) }
+if(!dir.exists(ddir)) { dir.create(ddir) }
+if(!dir.exists(odir)) { dir.create(odir) }
 ```
 
 Let's load all the packages we are going to need. For these exercises, we will be (1) working with tabular data, (2) working with vector spatial data, (3) working with `.jpg` photos, and (4) doing some static webscraping and HTML parsing.
@@ -48,7 +48,7 @@ You want to (1) create a path + file name for this file as it will be saved on y
 results.url <- "https://researchbriefings.files.parliament.uk/documents/CBP-10009/HoC-GE2024-results-by-candidate.csv"
 
 ## What is the path to the file?
-results.file <- str_extract(results.url, "________") # get the file name from the link (see above)
+results.file <- str_extract(results.url, "/([^/]+)$") # get the file name from the link (see above)
 results.file <- paste0(ddir, results.file) # create the full path to the file on your computer
 
 ## Check it worked: is this the right path?
@@ -61,13 +61,13 @@ If you get an error in the following code, it could be because the server is blo
 
 ```{r}
 ## If the results aren't already downloaded, do it!
-if(!file.exists(results.file)) { download.file(________, ________) }
+if(!file.exists(results.file)) { download.file(results.url, results.file) }
 ```
 
 Now, load the data as a tibble called `rf` and print the `head()` to see how it looks.
 
 ```{r}
-rf <- ________(results.file)
+rf <- read_csv(results.file)
 head(rf)
 ```
 
@@ -83,12 +83,12 @@ On the right hand side there is a link to download a `.geojson` file via the API
 borders.data <- "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Westminster_Parliamentary_Constituencies_July_2024_Boundaries_UK_BSC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
 
 borders.file <- paste0(ddir, "/mp_const.geojson") ## The url above doesn't have the file name, I made one up
-if(!file.exists(borders.file)) { download.file(________, ________) }
+if(!file.exists(borders.file)) { download.file(borders.data, borders.file) }
 
 ## Load the data and check it's right
-gf <- ________(borders.file)
+gf <- st_read(borders.file)
 print(gf)
-plot(gf$________) # Hint: only want to plot the vector map data
+plot(gf$geometry) # Hint: only want to plot the vector map data
 ```
 
 This is a very detailed map! Let's zoom in on Scotland, which is roughly north of 54.58 latitude and east of -7.786 longitude. For this, we use the `st_crop` function in `sf`.
@@ -99,11 +99,11 @@ bounds <- as.list(st_bbox(gf))
 print(bounds)
 
 ## We only want to crop the xmin and the ymin.
-bounds$________ <- 54.58
-bounds$________ <- -7.786
+bounds$ymin <- 54.58
+bounds$xmin <- -7.786
 
 ## Create the cropped sf object and plot it
-scotland <- ________(gf, ymin = bounds$ymin, ymax = bounds$ymax, xmin = bounds$xmin, xmax = bounds$xmax) # hint: Google the function for cropping a map in sf
+scotland <- st_crop(gf, ymin = bounds$ymin, ymax = bounds$ymax, xmin = bounds$xmin, xmax = bounds$xmax) # hint: Google the function for cropping a map in sf
 plot(scotland$geometry)
 ```
 
@@ -112,7 +112,8 @@ Now do this for greater London, but we do it in a different way. We get a list o
 ```{r}
 # Get the constituencies from Wikipedia -- only run this once!
 # Remember our scraping etiquette
-raw.html <- ________("https://en.wikipedia.org/wiki/Parliamentary_constituencies_in_London") 
+head(gf)
+raw.html <- read_html("https://en.wikipedia.org/wiki/Parliamentary_constituencies_in_London") 
 ```
 
 Now, using the HTML you extracted above, find the table lists each constituency in greater London.
@@ -120,12 +121,12 @@ Now, using the HTML you extracted above, find the table lists each constituency 
 ```{r}
 ## Extract the names of the constitiencies 
 london.consts <- raw.html %>% 
-  ________() %>%
-  .[[________]] ## Which table is the one on the page with the constituency names?
+  html_table() %>%
+  .[[3]] ## Which table is the one on the page with the constituency names?
 
 ## extract names
 london.consts <- london.consts$Constituency
-________(london.consts) # check there are 75, which there should be
+length(london.consts) # check there are 75, which there should be
 ```
 
 In the following code chunk, you will create a new dummy column called `london` in `gf`, with a 1 indicating the constituency in in London and 0 if not. You'll notice that there is 
@@ -134,7 +135,7 @@ In the following code chunk, you will create a new dummy column called `london` 
 ## Now let's create a new variable in our gf that indicates whether a constituency
 ## is a London constituency or not
 gf <- gf %>%
-  mutate(london = ifelse(str_to_lower(gf$________) %in% str_to_lower(london.consts), 1, 0)) 
+  mutate(london = ifelse(str_to_lower(gf$`PCON24NM`) %in% str_to_lower(london.consts), 1, 0)) 
 # Pop quiz: why did we use "str_to_lower" here?
 
 # Check there are 75
@@ -145,12 +146,12 @@ print(london.consts[!(london.consts %in% gf$PCON24NM[gf$london==1])])
 
 # Let's manually find it in `gf` and recode it as london=1
 print(gf$PCON24NM[str_detect(gf$PCON24NM, "Edmonton and Winchmore Hill")]) # check it is right--yes, there's a typo
-gf$london[________(gf$PCON24NM, "Edmonton and Winchmore Hill")] <- ________ # recode it
+gf$london[str_detect(gf$PCON24NM, "Edmonton and Winchmore Hill")] <- 1 # recode it
 
 sum(gf$london) # now there are 75
 
 ## Plot only London constituencies
-plot(gf$geometry[gf$________==1])
+plot(gf$geometry[gf$london==1])
 ```
 
 ### Part 3: merge election returns with spatial data
@@ -165,7 +166,8 @@ all(sort(unique(rf$`ONS ID`)) == sort(unique(gf$PCON24CD)))
 Let's now merge together into a big `df` dataframe with all the data!
 
 ```{r}
-df <- ________(gf, rf, by = c("________" = "________")) # Hint: use a "full join" from dplyr here 
+df <- full_join(gf, rf, by = c("PCON24CD" = "ONS ID")) # Hint: use a "full join" from dplyr here
+head(df)
 ```
 
 As you probably know, the Labour party won the 2024 election because it won in the highest most number of constituencies. Let's create some maps depicting the results of the election. 
@@ -178,21 +180,23 @@ But before we begin, notice that our `df` dataframe has a row for every candidat
 ## 1. create a new variable indicating what % of the vote each candidate won in each constituency,
 ## then arrange it in descending order by vote % within each constituency
 wf <- df %>%
-  group_by(________) %>% 
-  mutate(percent = ________) %>%
+  group_by(`PCON24CD`) %>% 
+  mutate(percent = `Share`*100) %>%
   ungroup() %>%
-  arrange(PCON24CD, desc(________))
+  arrange(PCON24CD, desc(percent))
+
+head(wf)
 
 ## 2. What is the winning margin? Subtract the runner up's vote % from the winner's vote %
 wf <- wf %>% 
   group_by(PCON24CD) %>% 
-  mutate(win_margin = round(percent-________(percent), 4)) %>% # Hint: how do you subtract the value in the next row from the value in current row in dplyr? Google it!
+  mutate(win_margin = round(percent - lead(percent), 4)) %>% # Hint: how do you subtract the value in the next row from the value in current row in dplyr? Google it!
   ungroup() %>%
-  ________(PCON24CD,PCON24NM,london,percent,win_margin,`Party abbreviation`,geometry) # Hint: only keep columns we need
+  select(PCON24CD,PCON24NM,london,percent,win_margin,`Party abbreviation`,geometry) # Hint: only keep columns we need
 
 ## 3. drop all rows except the first one for each constituency
 wf <- wf %>% 
-  group_by(________) %>% 
+  group_by(PCON24CD) %>% 
   filter(________) %>% 
   ungroup()
 ```
