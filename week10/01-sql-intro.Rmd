@@ -20,8 +20,8 @@ First, let's do a little directory management. Where do we want to store our wor
 
 ```{r}
 # Where do you want your data to be stored on your computer?
-ddir <- "tba" 
-if(!dir.exists(ddir) & ddir != "tba") { dir.create(ddir) }
+ddir <- "~/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/MY472/Website/week10/facebook" 
+if(!dir.exists(ddir)) { dir.create(ddir) }
 ```
 
 We will start by connecting to the database, creating an .sqlite file, and adding the first table, with information at the level of member of congress. 
@@ -31,7 +31,7 @@ We will start by connecting to the database, creating an .sqlite file, and addin
 db <- dbConnect(RSQLite::SQLite(), paste0(ddir, "facebook-db.sqlite"))
 
 # Reading the first file into R
-congress <- read_csv(paste0(ddir, "facebook-data/congress-facebook-2017.csv"))
+congress <- read_csv(paste0(ddir, "/congress-facebook-2017.csv"))
 
 # Adding a first table: User-level data
 ### Note: need to add overwrite=TRUE if you already created the DB once before
